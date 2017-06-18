@@ -17,7 +17,7 @@ echo "Saving most outputs to /root/install.log";
 echo "doing updates and installs"
 yum update -y > /root/install.log
 yum install epel-release -y >> /root/install.log
-yum install bind fail2ban cpan perl-Time-HiRes.x86_64 wget -y >> /root/install.log
+yum install bind perl-CGI fail2ban cpan perl-Time-HiRes.x86_64 wget -y >> /root/install.log
 yum groupinstall 'Development Tools' -y >> /root/install.log
 
 systemctl start named >> /root/install.log
