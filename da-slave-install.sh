@@ -19,15 +19,15 @@ yum update -y > /root/install.log
 yum install epel-release -y >> /root/install.log
 yum install bind fail2ban perl-Time-HiRes.x86_64 -y >> /root/install.log
 
-service named start >> /root/install.log
-service named stop >> /root/install.log
+systemctl start named >> /root/install.log
+systemctl stop named >> /root/install.log
 
 echo "creating user "$1" and adding to wheel"
 useradd -G wheel $1 > /root/install.log
 echo $2 |passwd $1 --stdin  >> /root/install.log
-echo "disable root acces to ssh"
+echo "disable root access to ssh"
 sed -i '/PermitRootLogin/ c\PermitRootLogin no' /etc/ssh/sshd_config
-service sshd restart  >> /root/install.log
+systemctl restart sshd  >> /root/install.log
 
 echo "ïnstalling perl modules"
 cd ~
@@ -66,7 +66,7 @@ make  >> /root/install.log
 make test >> /root/install.log
 make install >> /root/install.log
 
-echo "installing and confugrating directslave"
+echo "installing and configurating directslave"
 cd ~
 wget -q http://regme.in/download/directslave-2.1-beta.tar.gz  >> /root/install.log
 tar -xf directslave-2.1-beta.tar.gz
