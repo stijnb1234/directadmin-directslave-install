@@ -46,8 +46,8 @@ cp /usr/local/directslave/etc/directslave.conf /usr/local/directslave/etc/direct
 sed -i '/background/ c\background      1' /usr/local/directslave/etc/directslave.conf
 sed -i '/uid/ c\uid             named' /usr/local/directslave/etc/directslave.conf
 sed -i '/gid/ c\gid             named' /usr/local/directslave/etc/directslave.conf
-sed -i '/^ssl             on$/ c\ssl             off' /usr/local/directslave/etc/directslave.conf
-sed -i '/^debug/ c\debug           0' /usr/local/directslave/etc/directslave.conf
+sed -i '/ssl/ c\ssl             off' /usr/local/directslave/etc/directslave.conf
+sed -i '/debug/ c\debug           0' /usr/local/directslave/etc/directslave.conf
 
 #mkdir /etc/namedb
 mkdir -p /etc/namedb/secondary
