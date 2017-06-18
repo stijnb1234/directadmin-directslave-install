@@ -2,7 +2,7 @@
 
 ## Description
 
-Simple bash script to fully install and configure **DirectSlave** nameserver on a fresh Centos6 server.
+Simple bash script to fully install and configure **DirectSlave** nameserver on a fresh CentOS 7 server.
 
 Originally created by user **jordivn** on the Direct Admin forum: 
 
