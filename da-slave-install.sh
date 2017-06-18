@@ -30,8 +30,8 @@ echo "disable root access to ssh"
 sed -i '/PermitRootLogin/ c\PermitRootLogin no' /etc/ssh/sshd_config
 systemctl restart sshd  >> /root/install.log
 
-echo "ïnstalling perl modules"
-
+echo "installing perl modules"
+cpan install Crypt::PasswdMD5 Config::Auto Net::Server Net::CIDR
 
 echo "installing and configurating directslave"
 cd ~
