@@ -17,7 +17,8 @@ echo "Saving most outputs to /root/install.log";
 echo "doing updates and installs"
 yum update -y > /root/install.log
 yum install epel-release -y >> /root/install.log
-yum install bind fail2ban perl-Time-HiRes.x86_64 wget -y >> /root/install.log
+yum install bind fail2ban cpan perl-Time-HiRes.x86_64 wget -y >> /root/install.log
+yum groupinstall 'Development Tools' -y >> /root/install.log
 
 systemctl start named >> /root/install.log
 systemctl stop named >> /root/install.log
@@ -30,41 +31,7 @@ sed -i '/PermitRootLogin/ c\PermitRootLogin no' /etc/ssh/sshd_config
 systemctl restart sshd  >> /root/install.log
 
 echo "ïnstalling perl modules"
-cd ~
-wget -q http://www.cpan.org/authors/id/R/RS/RSAVAGE/Crypt-PasswdMD5-1.40.tgz  >> /root/install.log
-tar -xf Crypt-PasswdMD5-1.40.tgz
-cd Crypt-PasswdMD5-1.40
-perl Makefile.PL
-make  >> /root/install.log
-make test  >> /root/install.log
-make install  >> /root/install.log
 
-cd ~
-wget -q http://www.cpan.org/authors/id/B/BI/BINGOS/Config-Auto-0.44.tar.gz  >> /root/install.log
-tar -xf Config-Auto-0.44.tar.gz
-cd Config-Auto-0.44
-perl Makefile.PL
-make  >> /root/install.log
-make test  >> /root/install.log
-make install  >> /root/install.log
-
-cd ~
-wget -q http://www.cpan.org/authors/id/R/RH/RHANDOM/Net-Server-2.008.tar.gz  >> /root/install.log
-tar -xf Net-Server-2.008.tar.gz
-cd Net-Server-2.008
-perl Makefile.PL
-make  >> /root/install.log
-make test >> /root/install.log
-make install >> /root/install.log
-
-cd ~
-wget -q http://www.cpan.org/authors/id/M/MR/MRSAM/Net-CIDR-0.18.tar.gz  >> /root/install.log
-tar -xf Net-CIDR-0.18.tar.gz
-cd Net-CIDR-0.18
-perl Makefile.PL
-make  >> /root/install.log
-make test >> /root/install.log
-make install >> /root/install.log
 
 echo "installing and configurating directslave"
 cd ~
@@ -85,6 +52,7 @@ sed -i '/^debug/ c\debug           0' /usr/local/directslave/etc/directslave.con
 #mkdir /etc/namedb
 mkdir -p /etc/namedb/secondary
 touch /etc/namedb/secondary/named.conf
+touch /etc/namedb/directslave.conf
 chown named:named -R /etc/namedb
 echo "preparing named for jail2ban"
 mkdir /var/log/named
@@ -153,32 +121,6 @@ include \"/etc/namedb/directslave.conf\";
 /usr/local/directslave/bin/pass $1 $2
 /usr/local/directslave/bin/directslave --check  >> /root/install.log
 rm /usr/local/directslave/run/directslave.pid
-
-
-echo "setting basic iptables"
-systemctl stop firewalld >> /root/install.log
-systemctl mask firewalld  >> /root/install.log
-yum install iptables-services >> /root/install.log
-systemctl enable iptables >> /root/install.log
-systemctl stop iptables >> /root/install.log
-iptables -P INPUT ACCEPT
-iptables -P FORWARD ACCEPT
-iptables -P OUTPUT ACCEPT
-iptables -F
-iptables -N LOGGING
-iptables -A INPUT -i lo -j ACCEPT
-iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
-iptables -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
-iptables -A INPUT -p tcp -m tcp --dport 2222 -j ACCEPT
-iptables -A INPUT -p tcp -m tcp --dport 53 -j ACCEPT
-iptables -A INPUT -p udp -m udp --dport 53 -j ACCEPT
-iptables -A INPUT -j LOGGING
-iptables -A LOGGING -m limit --limit 2/min -j LOG --log-prefix "IPTables-Dropped: "
-iptables -A LOGGING -j DROP
-iptables -P INPUT DROP
-iptables -P FORWARD DROP
-iptables -P OUTPUT ACCEPT
-service iptables save >> /root/install.log
 
 
 echo "install and configure fail2ban"
@@ -267,8 +209,6 @@ chkconfig --level 345 fail2ban on
 chkconfig iptables on
 chkconfig --level 345 named on
 
-
-service iptables restart >> /root/install.log
 systemctl start fail2ban >> /root/install.log
 systemctl restart named >> /root/install.log
 systemctl restart directslave >> /root/install.log
