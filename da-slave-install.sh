@@ -17,7 +17,7 @@ echo "Saving most outputs to /root/install.log";
 echo "doing updates and installs"
 yum update -y > /root/install.log
 yum install epel-release -y >> /root/install.log
-yum install bind fail2ban perl-Time-HiRes.x86_64 -y >> /root/install.log
+yum install bind fail2ban perl-Time-HiRes.x86_64 wget -y >> /root/install.log
 
 systemctl start named >> /root/install.log
 systemctl stop named >> /root/install.log
@@ -156,7 +156,11 @@ rm /usr/local/directslave/run/directslave.pid
 
 
 echo "setting basic iptables"
-service iptables stop  >> /root/install.log
+systemctl stop firewalld >> /root/install.log
+systemctl mask firewalld  >> /root/install.log
+yum install iptables-services >> /root/install.log
+systemctl enable iptables >> /root/install.log
+systemctl stop iptables >> /root/install.log
 iptables -P INPUT ACCEPT
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
@@ -265,9 +269,9 @@ chkconfig --level 345 named on
 
 
 service iptables restart >> /root/install.log
-service fail2ban start >> /root/install.log
-service named restart >> /root/install.log
-service directslave restart >> /root/install.log
+systemctl start fail2ban >> /root/install.log
+systemctl restart named >> /root/install.log
+systemctl restart directslave >> /root/install.log
 
 echo "all done!"
 exit 0;
