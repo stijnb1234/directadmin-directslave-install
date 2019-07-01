@@ -17,8 +17,7 @@ echo "Saving most outputs to /root/install.log";
 echo "doing updates and installs"
 yum update -y > /root/install.log
 yum install epel-release -y >> /root/install.log
-yum install bind fail2ban wget -y >> /root/install.log
-yum groupinstall 'Development Tools' -y >> /root/install.log
+yum install bind wget -y >> /root/install.log
 
 systemctl start named >> /root/install.log
 systemctl stop named >> /root/install.log
@@ -40,18 +39,41 @@ mv directslave-linux-amd64 directslave
 cd /usr/local/directslave
 
 chown named:named -R /usr/local/directslave
-cp /usr/local/directslave/etc/directslave.conf.sample /usr/local/directslave/etc/directslave.conf.copy
+echo "
+background	1
 
-sed -i '/background/ c\background      1' /usr/local/directslave/etc/directslave.conf
-sed -i '/uid/ c\uid             named' /usr/local/directslave/etc/directslave.conf
-sed -i '/gid/ c\gid             named' /usr/local/directslave/etc/directslave.conf
-sed -i '/ssl/ c\ssl             off' /usr/local/directslave/etc/directslave.conf
-sed -i '/debug/ c\debug           0' /usr/local/directslave/etc/directslave.conf
+host            *
+
+port            2222
+ssl             off
+
+cookie_sess_id  DS_SESSID
+cookie_auth_key Change_this_line_to_something_long_&_secure
+
+debug           0
+uid             25
+gid             25
+
+pid             /usr/local/directslave/run/directslave.pid
+access_log	/usr/local/directslave/log/access.log
+error_log	/usr/local/directslave/log/error.log
+action_log	/usr/local/directslave/log/action.log
+
+named_workdir   /etc/namedb/secondary
+named_conf	/etc/namedb/directslave.inc
+retry_time	1200
+rndc_path	/usr/sbin/rndc
+named_format    text
+
+authfile        /usr/local/directslave/etc/passwd
+
+# `allow` directive removed, please, use your local firewall.
+" >> /usr/local/directslave/etc/directslave.conf
 
 #mkdir /etc/namedb
 mkdir -p /etc/namedb/secondary
 touch /etc/namedb/secondary/named.conf
-touch /etc/namedb/directslave.ini
+touch /etc/namedb/directslave.inc
 chown named:named -R /etc/namedb
 echo "preparing named for jail2ban"
 mkdir /var/log/named
@@ -114,23 +136,11 @@ include \"/etc/named.rfc1912.zones\";
 include \"/etc/named.root.key\";
 
 include \"/etc/namedb/directslave.conf\";
+" >> /etc/named.conf
 
-" > /etc/named.conf
-
-/usr/local/directslave/bin/pass $1 $2
+/usr/local/directslave/bin/directslave --password $1:$2
 /usr/local/directslave/bin/directslave --check  >> /root/install.log
 rm /usr/local/directslave/run/directslave.pid
-
-
-echo "install and configure fail2ban"
-cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
-sed -i '/^\[sshd\]/ a enabled = true' /etc/fail2ban/jail.local
-sed -i '/\[sshd-ddos\]/ a enabled = true' /etc/fail2ban/jail.local
-sed -i '/\[selinux-ssh\]/ a enabled = true' /etc/fail2ban/jail.local
-sed -i '/\[named-refused\]/ a enabled = true' /etc/fail2ban/jail.local
-sed -i '/\[directadmin\]/ a enabled = true' /etc/fail2ban/jail.local
-sed -i '/logpath = \/var\/log\/directadmin\/login.log/ c\logpath = /usr/local/directslave/log/access.log' /etc/fail2ban/jail.local
-
 
 echo "building directslave service"
 echo "
@@ -204,11 +214,9 @@ chown root:root /etc/rc.d/init.d/directslave
 chmod 755 /etc/rc.d/init.d/directslave
 chkconfig --add directslave
 chkconfig --level 2345 directslave on
-chkconfig --level 345 fail2ban on
 chkconfig iptables on
 chkconfig --level 345 named on
 
-systemctl start fail2ban >> /root/install.log
 systemctl restart named >> /root/install.log
 systemctl restart directslave >> /root/install.log
 
