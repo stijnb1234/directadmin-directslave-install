@@ -39,42 +39,36 @@ mv directslave-linux-amd64 directslave
 cd /usr/local/directslave
 
 chown named:named -R /usr/local/directslave
+curip="$( hostname -I|awk '{print $1}' )"
 cat > /usr/local/directslave/etc/directslave.conf <<EOF
 background	1
-
-host            "$3"
-
+host            $curip
 port            2222
 ssl             off
-
 cookie_sess_id  DS_SESSID
 cookie_auth_key Change_this_line_to_something_long_&_secure
-
 debug           0
 uid             25
 gid             25
-
 pid             /usr/local/directslave/run/directslave.pid
 access_log	/usr/local/directslave/log/access.log
 error_log	/usr/local/directslave/log/error.log
 action_log	/usr/local/directslave/log/action.log
-
 named_workdir   /etc/namedb/secondary
 named_conf	/etc/namedb/directslave.inc
 retry_time	1200
 rndc_path	/usr/sbin/rndc
 named_format    text
-
 authfile        /usr/local/directslave/etc/passwd
-
 # `allow` directive removed, please, use your local firewall.
 EOF
 
-echo "Building Direct Slave Directories and Files"
+#mkdir /etc/namedb
 mkdir -p /etc/namedb/secondary
 touch /etc/namedb/secondary/named.conf
 touch /etc/namedb/directslave.inc
 chown named:named -R /etc/namedb
+echo "preparing named for jail2ban"
 mkdir /var/log/named
 touch /var/log/named/security.log
 chmod a+w -R /var/log/named
@@ -90,7 +84,6 @@ cat > /etc/named.conf <<EOF
 //
 // See the BIND Administrator's Reference Manual (ARM) for details about the
 // configuration located in /usr/share/doc/bind-{version}/Bv9ARM.html
-
 options {
 	listen-on port 53 { any; };
 	listen-on-v6 port 53 { none; };
@@ -103,7 +96,6 @@ options {
 		allow-query     { any; };
 		allow-notify	{ $3; };
 		allow-transfer	{ none; };
-
 	/*
 	 - If you are building an AUTHORITATIVE DNS server, do NOT enable recursion.
 	 - If you are building a RECURSIVE (caching) DNS server, you need to enable
@@ -115,31 +107,24 @@ options {
 	   reduce such attack surface
 	*/
 	recursion no;
-
 	dnssec-enable yes;
 	dnssec-validation yes;
-
 	/* Path to ISC DLV key */
 	bindkeys-file "/etc/named.iscdlv.key";
-
 	managed-keys-directory "/var/named/dynamic";
-
 	pid-file "/run/named/named.pid";
 	session-keyfile "/run/named/session.key";
 };
-
 logging {
         channel default_debug {
                 file "data/named.run";
                 severity dynamic;
         };
 };
-
 zone "." IN {
 	type hint;
 	file "named.ca";
 };
-
 include "/etc/named.rfc1912.zones";
 include "/etc/named.root.key";
 include "/etc/namedb/directslave.inc";
@@ -153,13 +138,11 @@ cat > /etc/systemd/system/directslave.service <<EOL
 [Unit]
 Description=DirectSlave for DirectAdmin
 After=network.target
-
 [Service]
 Type=simple
 User=named
 ExecStart=/usr/local/directslave/bin/directslave --run
 Restart=always
-
 [Install]
 WantedBy=multi-user.target
 EOL
