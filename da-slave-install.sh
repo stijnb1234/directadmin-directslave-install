@@ -17,7 +17,7 @@ echo "Saving most outputs to /root/install.log";
 echo "doing updates and installs"
 yum update -y > /root/install.log
 yum install epel-release -y >> /root/install.log
-yum install bind perl-CGI fail2ban cpan perl-Time-HiRes.x86_64 wget -y >> /root/install.log
+yum install bind fail2ban wget -y >> /root/install.log
 yum groupinstall 'Development Tools' -y >> /root/install.log
 
 systemctl start named >> /root/install.log
@@ -30,14 +30,13 @@ echo "disable root access to ssh"
 sed -i '/PermitRootLogin/ c\PermitRootLogin no' /etc/ssh/sshd_config
 systemctl restart sshd  >> /root/install.log
 
-echo "installing perl modules"
-cpan install Crypt::PasswdMD5 Config::Auto Net::Server Net::CIDR
-
 echo "installing and configurating directslave"
 cd ~
-wget -q http://regme.in/download/directslave-2.1-beta.tar.gz  >> /root/install.log
-tar -xf directslave-2.1-beta.tar.gz
+wget -q https://directslave.com/download/directslave-3.2-advanced-all.tar.gz  >> /root/install.log
+tar -xf directslave-3.2-advanced-all.tar.gz
 mv directslave /usr/local/
+cd /usr/local/directslave/bin
+mv directslave-linux-amd64 directslave
 cd /usr/local/directslave
 
 chown named:named -R /usr/local/directslave
