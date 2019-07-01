@@ -1,6 +1,10 @@
 #!/bin/sh
-
-if [ -z "$1" ]; then
+# @author jordavin,phillcoxon,mantas15
+# @updated by Brent Dacus
+# @date 07.01.2019
+# @version 1.0.0
+# @source 
+# ------------------------------------------------------------------------------
  echo "useage <username> <userpass> <master ip>";
  exit 0;
 fi
