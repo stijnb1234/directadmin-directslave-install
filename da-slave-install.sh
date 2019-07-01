@@ -161,8 +161,8 @@ echo "setting enabled and starting up"
 chown root:root /etc/systemd/system/directslave.service
 chmod 755 /etc/systemd/system/directslave.service
 systemctl daemon-reload
-systemctl enabled named >> /root/install.log
-systemctl enabled directslave >> /root/install.log
+systemctl enable named >> /root/install.log
+systemctl enable directslave >> /root/install.log
 systemctl restart named >> /root/install.log
 systemctl restart directslave >> /root/install.log
 
