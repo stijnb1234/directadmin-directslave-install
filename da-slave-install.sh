@@ -70,12 +70,11 @@ authfile        /usr/local/directslave/etc/passwd
 # `allow` directive removed, please, use your local firewall.
 EOF
 
-#mkdir /etc/namedb
+echo "Building Direct Slave Directories and Files"
 mkdir -p /etc/namedb/secondary
 touch /etc/namedb/secondary/named.conf
 touch /etc/namedb/directslave.inc
 chown named:named -R /etc/namedb
-echo "preparing named for jail2ban"
 mkdir /var/log/named
 touch /var/log/named/security.log
 chmod a+w -R /var/log/named
@@ -102,8 +101,7 @@ options {
 	recursing-file  "/var/named/data/named.recursing";
 	secroots-file   "/var/named/data/named.secroots";
 		allow-query     { any; };
-		allow-recursion { none; };
-		allow-notify	{ "$3"; };
+		allow-notify	{ $3; };
 		allow-transfer	{ none; };
 
 	/*
