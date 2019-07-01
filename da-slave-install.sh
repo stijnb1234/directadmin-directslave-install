@@ -40,7 +40,7 @@ mv directslave-linux-amd64 directslave
 cd /usr/local/directslave
 
 chown named:named -R /usr/local/directslave
-cp /usr/local/directslave/etc/directslave.conf /usr/local/directslave/etc/directslave.conf.copy
+cp /usr/local/directslave/etc/directslave.conf.sample /usr/local/directslave/etc/directslave.conf.copy
 
 sed -i '/background/ c\background      1' /usr/local/directslave/etc/directslave.conf
 sed -i '/uid/ c\uid             named' /usr/local/directslave/etc/directslave.conf
@@ -51,7 +51,7 @@ sed -i '/debug/ c\debug           0' /usr/local/directslave/etc/directslave.conf
 #mkdir /etc/namedb
 mkdir -p /etc/namedb/secondary
 touch /etc/namedb/secondary/named.conf
-touch /etc/namedb/directslave.conf
+touch /etc/namedb/directslave.ini
 chown named:named -R /etc/namedb
 echo "preparing named for jail2ban"
 mkdir /var/log/named
