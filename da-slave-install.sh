@@ -135,7 +135,7 @@ zone \".\" IN {
 include \"/etc/named.rfc1912.zones\";
 include \"/etc/named.root.key\";
 
-include \"/etc/namedb/directslave.conf\";
+include \"/etc/namedb/directslave.inc\";
 " >> /etc/named.conf
 
 /usr/local/directslave/bin/directslave --password $1:$2
