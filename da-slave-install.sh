@@ -39,7 +39,7 @@ mv directslave-linux-amd64 directslave
 cd /usr/local/directslave
 
 chown named:named -R /usr/local/directslave
-echo "
+cat > /usr/local/directslave/etc/directslave.conf <<EOF
 background	1
 
 host            *
@@ -68,7 +68,7 @@ named_format    text
 authfile        /usr/local/directslave/etc/passwd
 
 # `allow` directive removed, please, use your local firewall.
-" >> /usr/local/directslave/etc/directslave.conf
+EOF
 
 #mkdir /etc/namedb
 mkdir -p /etc/namedb/secondary
@@ -80,7 +80,7 @@ mkdir /var/log/named
 touch /var/log/named/security.log
 chmod a+w -R /var/log/named
 
-echo "
+cat > /etc/named.comf <<EOF
 //
 // named.conf
 //
@@ -136,87 +136,33 @@ include \"/etc/named.rfc1912.zones\";
 include \"/etc/named.root.key\";
 
 include \"/etc/namedb/directslave.inc\";
-" >> /etc/named.conf
+EOF
 
 /usr/local/directslave/bin/directslave --password $1:$2
 /usr/local/directslave/bin/directslave --check  >> /root/install.log
 rm /usr/local/directslave/run/directslave.pid
 
-echo "building directslave service"
-echo "
-#!/bin/sh
+cat > /etc/systemd/system/directslave.service <<EOL
+[Unit]
+Description=DirectSlave for DirectAdmin
+After=network.target
 
-# directslave daemon            Start/Stop/Status/Restart
+[Service]
+Type=simple
+User=named
+ExecStart=/usr/local/directslave/bin/directslave --run
+Restart=always
 
-# chkconfig: 2345 80 20
-# description: Allow you to use DirectAdmin Multi-Server function \
-#              without need to have a DirectAdmin license, \
-#              for manage external DNS Server.
-# processname: directslave
-# config: /usr/local/directslave/etc/directslave.conf
-# pidfile: /usr/local/directslave/run/directslave.pid
+[Install]
+WantedBy=multi-user.target
+EOL
 
-# Source function library
-. /etc/rc.d/init.d/functions
-
-PROGBIN=\"/usr/local/directslave/bin/directslave --run\"
-PROGLOCK=/var/lock/subsys/directslave
-PROGNAME=directslave
-
-#check the command line for actions
-
-start() {
-        echo -n \"Starting DirectSlave: \"
-        daemon \$PROGBIN
-        echo
-        touch \$PROGLOCK
-}
-
-stop() {
-        echo -n \"Stopping DirectSlave: \"
-        killproc \$PROGNAME
-        echo
-        rm -f \$PROGLOCK
-}
-
-reload() {
-        echo -n \"Reloading DirectSlave config file: \"
-        killproc \$PROGNAME -HUP
-        echo
-}
-case \"\$1\" in
-        start)
-                start
-                ;;
-        stop)
-                stop
-                ;;
-        status)
-                status $PROGNAME
-                ;;
-        restart)
-                stop
-                start
-                ;;
-        reload)
-                reload
-                ;;
-        *)
-                echo \"Usage: \$1 {start|stop|status|reload|restart}\"
-                exit 1
-esac
-
-exit 0
-" > /etc/rc.d/init.d/directslave
-
-echo "setting chkconfig and starting up"
-chown root:root /etc/rc.d/init.d/directslave
-chmod 755 /etc/rc.d/init.d/directslave
-chkconfig --add directslave
-chkconfig --level 2345 directslave on
-chkconfig iptables on
-chkconfig --level 345 named on
-
+echo "setting enabled and starting up"
+chown root:root /etc/systemd/system/directslave.service
+chmod 755 /etc/systemd/system/directslave.service
+systemctl daemon-reload
+systemctl enabled named >> /root/install.log
+systemctl enabled directslave >> /root/install.log
 systemctl restart named >> /root/install.log
 systemctl restart directslave >> /root/install.log
 
