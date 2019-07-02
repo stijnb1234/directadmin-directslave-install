@@ -21,7 +21,7 @@ echo "Saving most outputs to /root/install.log";
 echo "doing updates and installs"
 yum update -y > /root/install.log
 yum install epel-release -y >> /root/install.log
-yum install bind wget -y >> /root/install.log
+yum install bind bind-utils wget -y >> /root/install.log
 
 systemctl start named >> /root/install.log
 systemctl stop named >> /root/install.log
