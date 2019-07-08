@@ -5,7 +5,7 @@
 # @version 1.0.0
 # @source 
 # ------------------------------------------------------------------------------
- if [ -z "$1" ]; then
+if [ -z "$1" ]; then
  echo "useage <username> <userpass> <master ip>";
  exit 0;
 fi
