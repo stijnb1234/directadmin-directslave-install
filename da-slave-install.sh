@@ -65,7 +65,6 @@ retry_time	1200
 rndc_path	/usr/sbin/rndc
 named_format    text
 authfile        /usr/local/directslave/etc/passwd
-# `allow` directive removed, please, use your local firewall.
 EOF
 
 #mkdir /etc/namedb
@@ -134,6 +133,8 @@ include "/etc/named.root.key";
 include "/etc/namedb/directslave.inc";
 EOF
 
+touch /usr/local/directslave/etc/passwd
+chown named:named /usr/local/directslave/etc/passwd
 /usr/local/directslave/bin/directslave --password $1:$2
 /usr/local/directslave/bin/directslave --check  >> /root/install.log
 rm /usr/local/directslave/run/directslave.pid
