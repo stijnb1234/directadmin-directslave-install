@@ -73,7 +73,6 @@ mkdir -p /etc/namedb/secondary
 touch /etc/namedb/secondary/named.conf
 touch /etc/namedb/directslave.inc
 chown named:named -R /etc/namedb
-echo "preparing named for jail2ban"
 mkdir /var/log/named
 touch /var/log/named/security.log
 chmod a+w -R /var/log/named
