@@ -6,15 +6,15 @@
 # @source 
 # ------------------------------------------------------------------------------
 if [ -z "$1" ]; then
- echo "useage <username> <userpass> <master ip>";
+ echo "usage <username> <userpass> <master ip>";
  exit 0;
 fi
 if [ -z "$2" ]; then
- echo "useage <username> <userpass> <master ip>";
+ echo "usage <username> <userpass> <master ip>";
  exit 0;
 fi
 if [ -z "$3" ]; then
- echo "useage <username> <userpass> <master ip>";
+ echo "usage <username> <userpass> <master ip>";
  exit 0;
 fi
 echo "Saving most outputs to /root/install.log";
@@ -34,7 +34,7 @@ echo "disable root access to ssh"
 sed -i '/PermitRootLogin/ c\PermitRootLogin no' /etc/ssh/sshd_config
 systemctl restart sshd  >> /root/install.log
 
-echo "installing and configurating directslave"
+echo "installing and configuring directslave"
 cd ~
 wget -q https://directslave.com/download/directslave-3.2-advanced-all.tar.gz  >> /root/install.log
 tar -xf directslave-3.2-advanced-all.tar.gz
