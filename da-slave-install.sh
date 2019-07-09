@@ -2,7 +2,7 @@
 # @author jordavin,phillcoxon,mantas15
 # @updated by Brent Dacus
 # @date 07.01.2019
-# @version 1.0.0
+# @version 1.0.1
 # @source 
 # ------------------------------------------------------------------------------
 if [ -z "$1" ]; then
