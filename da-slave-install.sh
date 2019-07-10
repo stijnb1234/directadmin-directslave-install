@@ -22,7 +22,8 @@ VN=`cat /etc/redhat-release | awk {'print $3}'`
 else [ "$VN" != "7.*" ]; elseif
 echo "System runs on  unsupported Linux. Exiting...";
 exit;
-fi if [ -z "$1" ]; then
+fi 
+if [ -z "$1" ]; then
  echo "usage <username> <userpass> <master ip>";
  exit 0;
 fi
