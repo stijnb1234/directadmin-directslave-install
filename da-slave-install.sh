@@ -5,7 +5,24 @@
 # @version 1.0.1
 # @source 
 # ------------------------------------------------------------------------------
-if [ -z "$1" ]; then
+sshport=22;
+#Check that user is root.
+if [ “$(id -u)” = “0” ]; then
+printf "We are root. Continue on....\n"
+  else
+printf "This script must be run as root\n"
+exit;
+fi
+#What Distro are you on?
+printf "Distro are you on??\n" 2>&1
+OS=`cat /etc/redhat-release | awk {'print $1}'`
+if [ "$OS" = "CentOS" ]; then
+echo "System runs on CentOS 7.X. Checking Continue on....";
+VN=`cat /etc/redhat-release | awk {'print $3}'`
+else [ "$VN" != "7.*" ]; elseif
+echo "System runs on  unsupported Linux. Exiting...";
+exit;
+fi if [ -z "$1" ]; then
  echo "usage <username> <userpass> <master ip>";
  exit 0;
 fi
@@ -30,8 +47,16 @@ systemctl stop named >> /root/install.log
 echo "creating user "$1" and adding to wheel"
 useradd -G wheel $1 > /root/install.log
 echo $2 |passwd $1 --stdin  >> /root/install.log
-echo "disable root access to ssh"
+echo "Disabling root access to ssh use "$1"."
+echo -n "${MAGENTA}Enter SSH port to change (recommended) from ${BLUE}${sshport}${MAGENTA}:${NORMAL} "
+		read customsshport
+		if [ $customsshport ]; then
+			sshport=$customsshport
+		fi
+echo "Your ssh port is ${sshport}"
 sed -i '/PermitRootLogin/ c\PermitRootLogin no' /etc/ssh/sshd_config
+sed -i -e "s/#Port 22/Port ${sshport}/g" /etc/ssh/sshd_config
+sed -i -e 's/#UseDNS yes/UseDNS no/g' /etc/ssh/sshd_config
 systemctl restart sshd  >> /root/install.log
 
 echo "installing and configuring directslave"
@@ -158,11 +183,20 @@ EOL
 echo "setting enabled and starting up"
 chown root:root /etc/systemd/system/directslave.service
 chmod 755 /etc/systemd/system/directslave.service
-systemctl daemon-reload
+systemctl daemon-reload >> /root/install.log
 systemctl enable named >> /root/install.log
 systemctl enable directslave >> /root/install.log
 systemctl restart named >> /root/install.log
 systemctl restart directslave >> /root/install.log
+echo "adding simple firewalld and opening Firewalld ports"
+yum update -y > /root/install.log
+yum install firewalld -y >> /root/install.log
 
+systemctl start firewalld >> /root/install.log
+systemctl enable firewalld >> /root/install.log
+firewall-cmd --permanent --add-service=dns
+firewall-cmd --permanent --add-port=2222/tcp
+firewall-cmd --reload
+systemctl start firewalld >> /root/install.log
 echo "all done!"
 exit 0;
