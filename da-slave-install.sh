@@ -2,7 +2,7 @@
 # @author jordavin,phillcoxon,mantas15
 # @updated by Brent Dacus
 # @date 07.01.2019
-# @version 1.0.1
+# @version 1.0.3
 # @source 
 # ------------------------------------------------------------------------------
 sshport=22;
