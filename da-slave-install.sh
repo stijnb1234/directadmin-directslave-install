@@ -41,9 +41,12 @@ tar -xf directslave-3.2-advanced-all.tar.gz
 mv directslave /usr/local/
 cd /usr/local/directslave/bin
 mv directslave-linux-amd64 directslave
+cd /usr/local/directslave/
+wget -q https://directslave.com/download/directslave-3.2-login-XSS-HOTFIX.tar.gz
+tar -xf directslave-3.2-login-XSS-HOTFIX.tar.gz
 cd /usr/local/directslave
-
 chown named:named -R /usr/local/directslave
+
 curip="$( hostname -I|awk '{print $1}' )"
 cat > /usr/local/directslave/etc/directslave.conf <<EOF
 background	1
