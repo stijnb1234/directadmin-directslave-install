@@ -198,6 +198,6 @@ systemctl enable firewalld >> /root/install.log
 firewall-cmd --permanent --add-service=dns
 firewall-cmd --permanent --add-port=2222/tcp
 firewall-cmd --reload
-systemctl start firewalld >> /root/install.log
+systemctl restart firewalld >> /root/install.log
 echo "all done!"
 exit 0;
