@@ -8,13 +8,10 @@ Originally created by user **jordivn** on the Direct Admin forum:
 
 https://forum.directadmin.com/showthread.php?t=43924&page=22&p=278112#post278112
 
+## Updated
+By bdacus01 using newer GO version of Directslave 3.3.  
 
 ## Aims
 
-* Make it very easy for users to install and configure DirectSlave on a second server  
-* Maintain updated documentation / tutorials on how to install & configure DirectSlave
-
-## Todo
-
-- [ ] Identify and update script with patches / improvements mentioned in the DirectSlave thread
-- [ ] Install letsencrypt, generate SSL certificate, enable SSL for DirectSlave
+* Make it very easy for users to install and configure DirectSlave on a second server.
+* Maintain updated documentation / tutorials on how to install & configure DirectSlave.
