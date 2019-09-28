@@ -62,14 +62,11 @@ systemctl restart sshd  >> /root/install.log
 
 echo "installing and configuring directslave"
 cd ~
-wget -q https://directslave.com/download/directslave-3.2-advanced-all.tar.gz  >> /root/install.log
-tar -xf directslave-3.2-advanced-all.tar.gz
+wget -q https://directslave.com/download/directslave-3.3-advanced-all.tar.gz  >> /root/install.log
+tar -xf directslave-3.3-advanced-all.tar.gz
 mv directslave /usr/local/
 cd /usr/local/directslave/bin
 mv directslave-linux-amd64 directslave
-cd /usr/local/directslave/
-wget -q https://directslave.com/download/directslave-3.2-login-XSS-HOTFIX.tar.gz
-tar -xf directslave-3.2-login-XSS-HOTFIX.tar.gz
 cd /usr/local/directslave
 chown named:named -R /usr/local/directslave
 
