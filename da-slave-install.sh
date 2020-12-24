@@ -62,7 +62,7 @@ systemctl restart sshd  >> /root/install.log
 
 echo "installing and configuring directslave"
 cd ~
-wget -q https://directslave.com/download/directslave-3.3-advanced-all.tar.gz  >> /root/install.log
+wget -q https://directslave.com/download/directslave-3.4.1-advanced-all.tar.gz  >> /root/install.log
 tar -xf directslave-3.3-advanced-all.tar.gz
 mv directslave /usr/local/
 cd /usr/local/directslave/bin
