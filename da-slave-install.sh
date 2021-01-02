@@ -1,83 +1,108 @@
 #!/bin/sh
 # @author jordavin,phillcoxon,mantas15
 # @updated by Brent Dacus
-# @date 07.01.2019
-# @version 1.0.3
-# @source 
+# @date 01.01.2021
+# @version 1.0.4
+# @source
 # ------------------------------------------------------------------------------
-sshport=22;
+# -----------------------------------#
+# System vars.			          			 #
+# -----------------------------------#
+cur_hostname="$(hostnamectl --static)"
+serverip="$(hostname -I | awk '{print $1}')"
+servername="$(hostname -s)"
+OS=$(cat /etc/redhat-release | awk {'print $1}')
+VN=$(cat /etc/centos-release | tr -dc '0-9.' | cut -d \. -f1)
+# -----------------------------------#
+# Declare vars.			   			 #
+# -----------------------------------#
+logfile=/root/install.log
+builddir=~/dsbuild/
+sshport=22
+
 #Check that user is root.
 if [ “$(id -u)” = “0” ]; then
-printf "We are root. Continue on....\n"
-  else
-printf "This script must be run as root\n"
-exit;
+	printf "We are root. Continue on....\n"
+else
+	printf "This script must be run as root\n"
+	exit
 fi
 #What Distro are you on?
 printf "Distro are you on??\n" 2>&1
-OS=`cat /etc/redhat-release | awk {'print $1}'`
-if [ "$OS" = "CentOS" ]; then
-echo "System runs on CentOS 7.X. Checking Continue on....";
-VN=`cat /etc/redhat-release | awk {'print $3}'`
-else [ "$VN" != "7.*" ]; elseif
-echo "System runs on  unsupported Linux. Exiting...";
-exit;
-fi 
+if [ "${OS}" = "CentOS" ]; then
+	echo "System runs on "${OS}" "${VN}". Checking Continue on...."
+	mkdir -p "${builddir}"
+else
+	[ "${VN}" != "7.*" ]
+	elseif
+	echo "System runs on  unsupported Linux. Exiting..."
+	exit
+fi
 if [ -z "$1" ]; then
- echo "usage <username> <userpass> <master ip>";
- exit 0;
+	echo "usage <username> <userpass> <master ip>"
+	exit 0
 fi
 if [ -z "$2" ]; then
- echo "usage <username> <userpass> <master ip>";
- exit 0;
+	echo "usage <username> <userpass> <master ip>"
+	exit 0
 fi
 if [ -z "$3" ]; then
- echo "usage <username> <userpass> <master ip>";
- exit 0;
+	echo "usage <username> <userpass> <master ip>"
+	exit 0
 fi
-echo "Saving most outputs to /root/install.log";
+echo "Saving most outputs to ${logfile}"
 
 echo "doing updates and installs"
-yum update -y > /root/install.log
-yum install epel-release -y >> /root/install.log
-yum install bind bind-utils wget -y >> /root/install.log
+yum update -y >${logfile}
+yum install epel-release -y >>${logfile}
+yum install bind bind-utils wget -y >>${logfile}
 
-systemctl start named >> /root/install.log
-systemctl stop named >> /root/install.log
+systemctl start named >>${logfile}
+systemctl stop named >>${logfile}
 
 echo "creating user "$1" and adding to wheel"
-useradd -G wheel $1 > /root/install.log
-echo $2 |passwd $1 --stdin  >> /root/install.log
-echo "Disabling root access to ssh use "$1"."
-echo -n "${MAGENTA}Enter SSH port to change (recommended) from ${BLUE}${sshport}${MAGENTA}:${NORMAL} "
-		read customsshport
-		if [ $customsshport ]; then
-			sshport=$customsshport
-		fi
-echo "Your ssh port is ${sshport}"
-sed -i '/PermitRootLogin/ c\PermitRootLogin no' /etc/ssh/sshd_config
-sed -i -e "s/#Port 22/Port ${sshport}/g" /etc/ssh/sshd_config
-sed -i -e 's/#UseDNS yes/UseDNS no/g' /etc/ssh/sshd_config
-systemctl restart sshd  >> /root/install.log
+useradd -G wheel $1 >>${logfile}
+echo $2 | passwd $1 --stdin >>${logfile}
+echo "Disabling root access to ssh to server use "$1"."
+cursshport="$(cat /etc/ssh/sshd_config | grep "Port ")"
+	read -p "Enter SSH port to change to:" customsshport
+	if [ $customsshport ]; then
+		sshport=$customsshport
+	fi
+	echo "Set to Port: "$sshport
+	echo "Securing the server, please wait..."
+	sed -i -e "s/$cursshport/Port ${sshport}/g" /etc/ssh/sshd_config >>${logfile}
+	sed -i -e 's/#UseDNS yes/UseDNS no/g' /etc/ssh/sshd_config >>${logfile}
+	sed -i -e 's/#AddressFamily any/AddressFamily inet/g' /etc/ssh/sshd_config >>${logfile}
+	sed -i -e 's/#LoginGraceTime 2m/LoginGraceTime 2m/g' /etc/ssh/sshd_config >>${logfile}
+	sed -i -e 's/#MaxAuthTries 6/MaxAuthTries 5/g' /etc/ssh/sshd_config >>${logfile}
+	sed -i -e 's/#MaxStartups 10:30:100/MaxStartups 10:30:100/g' /etc/ssh/sshd_config >>${logfile}
+	sed -i -e 's/.*PermitRootLogin yes/PermitRootLogin prohibit-password/g' /etc/ssh/sshd_config >>${logfile}
+	sed -i -e 's/PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config >>${logfile}
+	sed -i -e 's/#ClientAliveInterval .*/ClientAliveInterval 120/g' /etc/ssh/sshd_config >>${logfile}
+	sed -i -e 's/#ClientAliveCountMax .*/ClientAliveCountMax 15/g' /etc/ssh/sshd_config >>${logfile}
+systemctl restart sshd
 
 echo "installing and configuring directslave"
 cd ~
-wget -q https://directslave.com/download/directslave-3.4.1-advanced-all.tar.gz  >> /root/install.log
-tar -xf directslave-3.3-advanced-all.tar.gz
+wget -q https://directslave.com/download/directslave-3.4.1-advanced-all.tar.gz >>${logfile}
+tar -xf directslave-3.4.1-advanced-all.tar.gz
 mv directslave /usr/local/
 cd /usr/local/directslave/bin
 mv directslave-linux-amd64 directslave
 cd /usr/local/directslave
 chown named:named -R /usr/local/directslave
 
-curip="$( hostname -I|awk '{print $1}' )"
-cat > /usr/local/directslave/etc/directslave.conf <<EOF
+randomnum="$(tr -cd 'a-zA-Z0-9' </dev/urandom 2>/dev/null | head -c25)"
+curip="$(hostname -I | awk '{print $1}')"
+
+cat >/usr/local/directslave/etc/directslave.conf <<EOF
 background	1
 host            $curip
 port            2222
 ssl             off
 cookie_sess_id  DS_SESSID
-cookie_auth_key Change_this_line_to_something_long_&_secure
+cookie_auth_key $randomnum
 debug           0
 uid             25
 gid             25
@@ -102,7 +127,7 @@ mkdir /var/log/named
 touch /var/log/named/security.log
 chmod a+w -R /var/log/named
 
-cat > /etc/named.conf <<EOF
+cat >/etc/named.conf <<EOF
 //
 // named.conf
 //
@@ -162,10 +187,10 @@ EOF
 touch /usr/local/directslave/etc/passwd
 chown named:named /usr/local/directslave/etc/passwd
 /usr/local/directslave/bin/directslave --password $1:$2
-/usr/local/directslave/bin/directslave --check  >> /root/install.log
+/usr/local/directslave/bin/directslave --check >>${logfile}
 rm /usr/local/directslave/run/directslave.pid
 
-cat > /etc/systemd/system/directslave.service <<EOL
+cat >/etc/systemd/system/directslave.service <<EOL
 [Unit]
 Description=DirectSlave for DirectAdmin
 After=network.target
@@ -181,20 +206,21 @@ EOL
 echo "setting enabled and starting up"
 chown root:root /etc/systemd/system/directslave.service
 chmod 755 /etc/systemd/system/directslave.service
-systemctl daemon-reload >> /root/install.log
-systemctl enable named >> /root/install.log
-systemctl enable directslave >> /root/install.log
-systemctl restart named >> /root/install.log
-systemctl restart directslave >> /root/install.log
+systemctl daemon-reload >>${logfile}
+systemctl enable named >>${logfile}
+systemctl enable directslave >>${logfile}
+systemctl restart named >>${logfile}
+systemctl restart directslave >>${logfile}
+systemctl status directslave >>${logfile}
 echo "adding simple firewalld and opening Firewalld ports"
-yum update -y > /root/install.log
-yum install firewalld -y >> /root/install.log
+yum update -y >>${logfile}
+yum install firewalld -y >>${logfile}
 
-systemctl start firewalld >> /root/install.log
-systemctl enable firewalld >> /root/install.log
+systemctl start firewalld >>${logfile}
+systemctl enable firewalld >>${logfile}
 firewall-cmd --permanent --add-service=dns
 firewall-cmd --permanent --add-port=2222/tcp
 firewall-cmd --reload
-systemctl restart firewalld >> /root/install.log
-echo "all done!"
-exit 0;
+systemctl restart firewalld >>${logfile}
+echo "all done!" >>${logfile}
+exit 0
