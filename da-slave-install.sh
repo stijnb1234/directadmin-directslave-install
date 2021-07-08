@@ -1,8 +1,8 @@
 #!/bin/sh
 # @author jordavin,phillcoxon,mantas15
-# @updated by Brent Dacus
-# @date 01.01.2021
-# @version 1.0.4
+# @updated by Brent Dacus, Stijn Bannink
+# @date 08.07.2021
+# @version 1.0.5
 # @source
 # ------------------------------------------------------------------------------
 # -----------------------------------#
@@ -85,8 +85,8 @@ systemctl restart sshd
 
 echo "installing and configuring directslave"
 cd ~
-wget -q https://directslave.com/download/directslave-3.4.1-advanced-all.tar.gz >>${logfile}
-tar -xf directslave-3.4.1-advanced-all.tar.gz
+wget -q https://directslave.com/download/directslave-3.4.2-advanced-all.tar.gz >>${logfile}
+tar -xf directslave-3.4.2-advanced-all.tar.gz
 mv directslave /usr/local/
 cd /usr/local/directslave/bin
 mv directslave-linux-amd64 directslave
