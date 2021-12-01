@@ -29,7 +29,7 @@ else
 fi
 #What Distro are you on?
 printf "Distro are you on??\n" 2>&1
-if [ "${OS}" = "CentOS" ]; then
+if [ "${OS}" = "CentOS" ] || [ "${OS}" =~ "AlmaLinux" ]; then
 	echo "System runs on "${OS}" "${VN}". Checking Continue on...."
 	mkdir -p "${builddir}"
 else
