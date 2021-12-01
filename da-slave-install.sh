@@ -29,12 +29,10 @@ else
 fi
 #What Distro are you on?
 printf "Distro are you on??\n" 2>&1
-if [ "${OS}" = "CentOS" ] || [ "${OS}" =~ "AlmaLinux" ]; then
+if [ "${VN}" != "7.*" ] && { [[ "${OS}" = "CentOS" || "${OS}" =~ "AlmaLinux" ]] ; }; then
 	echo "System runs on "${OS}" "${VN}". Checking Continue on...."
 	mkdir -p "${builddir}"
 else
-	[ "${VN}" != "7.*" ]
-	elseif
 	echo "System runs on  unsupported Linux. Exiting..."
 	exit
 fi
