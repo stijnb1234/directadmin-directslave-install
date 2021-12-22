@@ -58,29 +58,6 @@ yum install bind bind-utils wget -y >>${logfile}
 systemctl start named >>${logfile}
 systemctl stop named >>${logfile}
 
-echo "creating user "$1" and adding to wheel"
-useradd -G wheel $1 >>${logfile}
-echo $2 | passwd $1 --stdin >>${logfile}
-echo "Disabling root access to ssh to server use "$1"."
-cursshport="$(cat /etc/ssh/sshd_config | grep "Port ")"
-	read -p "Enter SSH port to change to:" customsshport
-	if [ $customsshport ]; then
-		sshport=$customsshport
-	fi
-	echo "Set to Port: "$sshport
-	echo "Securing the server, please wait..."
-	sed -i -e "s/$cursshport/Port ${sshport}/g" /etc/ssh/sshd_config >>${logfile}
-	sed -i -e 's/#UseDNS yes/UseDNS no/g' /etc/ssh/sshd_config >>${logfile}
-	sed -i -e 's/#AddressFamily any/AddressFamily inet/g' /etc/ssh/sshd_config >>${logfile}
-	sed -i -e 's/#LoginGraceTime 2m/LoginGraceTime 2m/g' /etc/ssh/sshd_config >>${logfile}
-	sed -i -e 's/#MaxAuthTries 6/MaxAuthTries 5/g' /etc/ssh/sshd_config >>${logfile}
-	sed -i -e 's/#MaxStartups 10:30:100/MaxStartups 10:30:100/g' /etc/ssh/sshd_config >>${logfile}
-	sed -i -e 's/.*PermitRootLogin yes/PermitRootLogin prohibit-password/g' /etc/ssh/sshd_config >>${logfile}
-	sed -i -e 's/PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config >>${logfile}
-	sed -i -e 's/#ClientAliveInterval .*/ClientAliveInterval 120/g' /etc/ssh/sshd_config >>${logfile}
-	sed -i -e 's/#ClientAliveCountMax .*/ClientAliveCountMax 15/g' /etc/ssh/sshd_config >>${logfile}
-systemctl restart sshd
-
 echo "installing and configuring directslave"
 cd ~
 wget -q https://directslave.com/download/directslave-3.4.2-advanced-all.tar.gz >>${logfile}
