@@ -60,8 +60,8 @@ systemctl stop named >>${logfile}
 
 echo "installing and configuring directslave"
 cd ~
-wget -q https://directslave.com/download/directslave-3.4.2-advanced-all.tar.gz >>${logfile}
-tar -xf directslave-3.4.2-advanced-all.tar.gz
+wget -q https://directslave.com/download/directslave-3.4.3-advanced-all.tar.gz >>${logfile}
+tar -xf directslave-3.4.3-advanced-all.tar.gz
 mv directslave /usr/local/
 cd /usr/local/directslave/bin
 mv directslave-linux-amd64 directslave
